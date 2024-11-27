@@ -1,0 +1,158 @@
+---
+title: "Case Study 2"
+author: "Vibha Srinivasa"
+date:  
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    theme: paper
+    highlight: tango
+---
+
+##  Part 1: 
+### Problem 1 [10 points]: table(), tapply()
+
+The `MASS` package contains a dataset called `Insurance`.  Read the help file on this data set to understand its contents.
+
+```{r}
+library(tidyverse)
+library(MASS) # contains Insurance data frame
+data("Insurance") # Load Insurance data frame from MASS package
+?Insurance
+# or
+help(Insurance)
+
+```
+
+##### (a) table() [5 points]
+
+Use the `table()` function to produce a contingency table of observation counts across `District` and `Age`.
+
+```{r}
+district_age_table <- table(Insurance$District, Insurance$Age)
+district_age_table
+```
+
+##### (b) tapply() [5 points]
+
+Use the `tapply()` function to produce a table showing the **average** number of Holders across District and Age categories.
+
+```{r}
+average_holders <- tapply(Insurance$Holders, list(Insurance$District, Insurance$Age), mean)
+average_holders
+
+```
+
+### Problem 2 [20 points]: A more complex `tapply()` example (Claims per Holder)
+
+##### (a) Total number of Holders by District and Age [5 points]
+
+Use the `tapply()` function to produce a table showing the total number of Holders across District and Age. Save this table in a variable, and also display your answer.
+
+```{r}
+total_holders <- tapply(Insurance$Holders, list(Insurance$District, Insurance$Age), sum)
+total_holders
+
+```
+
+##### (b) Total number of Claims by District and Age [5 points]
+
+Use the `tapply()` function to produce a table showing the total number of Claims across District and Age. Save this table in a variable, and also display your answer.
+
+```{r}
+total_claims <- tapply(Insurance$Claims, list(Insurance$District, Insurance$Age), sum)
+total_claims
+```
+
+##### (c) Rate of Claims per Holder by District and Age [5 points]
+
+Use your answers from parts **(a)** and **(b)** to produce a table that shows the rate of Claims per Holder across District and Age. 
+
+```{r}
+claims_per_holder_rate <- total_claims / total_holders
+claims_per_holder_rate
+
+```
+
+Tip: *If an insurance company has 120,000 policy holders and receives 14,000 claims, the rate of claims per holder is 14000/120000 = `r round(14000/120000,3) `*
+
+##### (d) Do you observe any trends in how the number of claims per holder varies with age? [5 points]
+
+<font color="#157515"><b>
+
+From the above table, we can observe any potential trends such as whether the rate of claims per holder increases or decreases with age. This observation could help identify specific patterns or risk factors in different age groups and districts.
+
+</font></b>
+
+
+##  Part 2: To complete the following questions, follow these steps:
+1. To complete questions 3 and 4, you need to download the file Facebook_metrics.zip from http://archive.ics.uci.edu/ml/machine-learning-databases/00368/. 
+2. Unzip the file and read the data from dataset_Facebook.csv into a dataframe called fb.df. 
+3. Get the summary information for fb.df to familiarize yourself with the various vectors included in the data frame.  
+
+This zip file contains information on Facebook posts by a major cosmetics brand. It is a publicly available dataset that has been anonymized. So the available information is mainly about the type of post (link, photo, video, status update), the number of likes, comments, shares on each post, and cumulative information such as the total number of page likes, the total number of shares, etc. It gives a good insight into the social media interactions of the brand.
+
+
+# Load the data
+fb.df <- read_csv2("Facebook.csv")
+#summary of the data frame
+summary(fb.df)
+
+
+### Problem 3 [10 points]: Write a for-loop that calculates how many paid posts reached at least 1000 likes.  What percentage of the paid posts reached at least 1000 likes?
+```{r}
+paid_posts_1000_likes <- 0
+total_paid_posts <- 0
+
+
+
+for (i in 1:nrow(fb.df)) {
+  if (!is.na(fb.df[i, "Paid"]) && fb.df[i, "Paid"] == 1) {
+    total_paid_posts <- total_paid_posts + 1
+    if (!is.na(fb.df[i, "like"]) &&fb.df[i, "like"] >= 1000) {
+    paid_posts_1000_likes <- paid_posts_1000_likes + 1
+  }
+  }
+  
+}
+
+total_paid_posts
+paid_posts_1000_likes
+percentage_paid_1000_likes <- (paid_posts_1000_likes / row) * 100
+
+cat("Number of paid posts reaching at least 1000 likes:", paid_posts_1000_likes, "\n")
+cat("Percentage of paid posts reaching at least 1000 likes:", percentage_paid_1000_likes, "%\n")
+
+
+
+```
+### Problem 4 [10 points]:	Write a for-loop that calculates how many unpaid posts reached at least 1000 likes.  What percentage of the unpaid posts reached at least 1000 likes?  If “success” is measured by the company as having at least 1000 likes to a post, is it a good idea to pay for a post to get there?
+```{r}
+
+total_unpaid_posts <- 0
+unpaid_posts_1000_likes <- 0
+
+
+
+for (j in 1:nrow(fb.df)) {
+  if (!is.na(fb.df[j, "Paid"]) && fb.df[j, "Paid"] == 0) {
+    total_unpaid_posts <- total_unpaid_posts + 1
+    if (!is.na(fb.df[j, "like"]) && fb.df[j, "like"] >= 1000) {
+      unpaid_posts_1000_likes <- unpaid_posts_1000_likes + 1
+  }
+  }
+  
+}
+
+percentage_successful_posts <- (unpaid_posts_1000_likes / row) * 100
+
+# Print the results
+cat("Number of unpaid posts with at least 1000 likes:", unpaid_posts_1000_likes, "\n")
+cat("Percentage of unpaid posts with at least 1000 likes:", round(percentage_successful_posts, 2), "%\n")
+
+#When success is defined by the company as achieving at least 1000 likes per post, the data #suggests that it might not be a wise decision to pay for posts to reach this threshold. This #conclusion is drawn from the fact that 1.2% of posts attained 1000 or more likes without #being paid, compared to only 0.8% of posts that achieved the same level of engagement when #paid for.
+```
+
+
+
